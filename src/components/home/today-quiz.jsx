@@ -186,9 +186,9 @@ export function TodayQuiz() {
         </span>
       </div>
 
-      <div className="mx-4 mb-3.5 bg-white/95 rounded-[20px] p-4 shadow-[0_2px_16px_rgba(60,60,120,0.10)]">
+      <div className="mx-4 mb-3.5 bg-white/95 rounded-[24px] p-4 shadow-[0_2px_16px_rgba(60,60,120,0.10)]">
         {isLoading && (
-          <div className="rounded-xl bg-gradient-to-br from-[#f8f0ff] to-[#f0faff] p-5 text-center">
+          <div className="rounded-2xl bg-gradient-to-br from-[#f8f0ff] to-[#f0faff] p-5 text-center">
             <div className="mb-2 text-[28px]">🐢</div>
             <p className="text-sm font-black text-[#1a1a2e]">
               오늘의 과제를 불러오는 중이에요
@@ -197,7 +197,7 @@ export function TodayQuiz() {
         )}
 
         {!isLoading && loadError && (
-          <div className="rounded-xl bg-gradient-to-br from-[#fff5f7] to-[#f8f0ff] p-5 text-center">
+          <div className="rounded-2xl bg-gradient-to-br from-[#fff5f7] to-[#f8f0ff] p-5 text-center">
             <div className="mb-2 text-[28px]">⚠️</div>
             <p className="text-sm font-black text-[#1a1a2e]">{loadError}</p>
             <button
@@ -219,7 +219,7 @@ export function TodayQuiz() {
             return (
               <div
                 key={quiz.id}
-                className={`bg-gradient-to-br from-[#f8f0ff] to-[#f0faff] rounded-xl p-3.5 mb-2.5 last:mb-0 border-2 transition-colors ${
+                className={`bg-gradient-to-br from-[#f8f0ff] to-[#f0faff] rounded-2xl p-4 mb-3 last:mb-0 border-2 transition-colors ${
                   isDone
                     ? result.correct
                       ? "border-[#3CBBA2] bg-[rgba(60,187,162,0.06)]"
@@ -227,18 +227,18 @@ export function TodayQuiz() {
                     : "border-transparent"
                 }`}
               >
-                <div className="mb-1 text-[11px] font-black text-[#7C3AED]">
+                <div className="mb-2 text-left text-[12px] font-black text-[#7C3AED] leading-relaxed">
                   {quiz.articleTitle}
                 </div>
 
-                <div className="text-sm font-bold text-[#1a1a2e] mb-2 leading-[1.4]">
+                <div className="text-left text-[15px] font-black text-[#1a1a2e] mb-3 leading-relaxed">
                   Q{quiz.order}. {quiz.question}
                 </div>
 
-                <div className="flex gap-1.5 flex-wrap">
+                <div className="grid gap-2">
                   {quiz.options.map((option, index) => {
                     let buttonClass =
-                      "py-1.5 px-3 border-2 rounded-lg text-[13px] font-bold bg-white cursor-pointer transition-all";
+                      "w-full min-h-[48px] py-2.5 px-3.5 border-2 rounded-xl text-[13px] font-bold bg-white cursor-pointer transition-all text-left leading-relaxed flex items-center";
 
                     if (isDone) {
                       if (index === result.correctIndex) {
@@ -264,7 +264,7 @@ export function TodayQuiz() {
                         onClick={() => handleAnswer(quiz, index)}
                         disabled={isDone}
                       >
-                        {option}
+                        <span className="block w-full">{option}</span>
                       </button>
                     );
                   })}
@@ -272,7 +272,7 @@ export function TodayQuiz() {
 
                 {isDone && (
                   <div
-                    className={`mt-2 py-2 px-2.5 rounded-lg text-[12px] font-bold leading-relaxed ${
+                    className={`mt-3 py-2.5 px-3 rounded-xl text-[12px] font-bold leading-relaxed text-left ${
                       result.correct
                         ? "bg-[rgba(60,187,162,0.12)] text-[#1a7a64]"
                         : "bg-[rgba(255,77,109,0.10)] text-[#c0243a]"
