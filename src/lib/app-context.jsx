@@ -359,6 +359,7 @@ export function AppProvider({ children }) {
 
   const [marketTempOpen, setMarketTempOpen] = useState(false);
   const [currentKospiStatus, setCurrentKospiStatus] = useState("sunny");
+  const [economicWeather, setEconomicWeather] = useState(null);
 
   const [alertPopOpen, setAlertPopOpen] = useState(false);
   const [alertPopData, setAlertPopData] = useState({});
@@ -473,6 +474,9 @@ export function AppProvider({ children }) {
     currentKospiStatus,
     setCurrentKospiStatus,
 
+    economicWeather,
+    setEconomicWeather,
+
     alertPopOpen,
     setAlertPopOpen,
     alertPopData,
@@ -487,7 +491,7 @@ export function AppProvider({ children }) {
 
 export function useApp() {
   const context = useContext(AppContext);
-
+  const [economicWeather, setEconomicWeather] = useState(null);
   if (!context) {
     throw new Error("useApp must be used within an AppProvider");
   }
