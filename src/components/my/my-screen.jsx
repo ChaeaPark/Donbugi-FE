@@ -2,31 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useApp, CHARS } from "@/lib/app-context";
-import { getStoredUserId, quizApi } from "@/lib/api";
-
-const pointHistory = [
-  {
-    icon: "⚔️",
-    title: "오늘의 과제 참여",
-    desc: "오늘 · 퀴즈 풀이 기록",
-    amount: "+20P",
-    isPlus: true,
-  },
-  {
-    icon: "🔥",
-    title: "7일 연속 출석 보너스",
-    desc: "어제 · 출석 체크",
-    amount: "+100P",
-    isPlus: true,
-  },
-  {
-    icon: "🎁",
-    title: "커피 쿠폰 교환",
-    desc: "혜택 교환 사용",
-    amount: "-800P",
-    isPlus: false,
-  },
-];
+import { getStoredUserId, quizApi, pointApi } from "@/lib/api";
 
 function getRateText(stats) {
   if (!stats || typeof stats.ratePercent !== "number") {
@@ -64,13 +40,36 @@ function formatDateTime(value) {
   }
 }
 
+function getActivityIcon(type) {
+  const iconMap = {
+    ATTENDANCE: "🔥",
+    DAILY_QUIZ: "⚔️",
+    NEWS_QUIZ: "🧩",
+    REDEEM: "🎁",
+    BONUS: "🌟",
+  };
+  return iconMap[type] ?? "💰";
+}
+
 export function MyScreen() {
   const { userNick, userChar, toast } = useApp();
   const char = userChar || CHARS[0];
 
+  // 퀴즈 대시보드
   const [dashboard, setDashboard] = useState(null);
   const [isLoadingDashboard, setIsLoadingDashboard] = useState(true);
   const [dashboardError, setDashboardError] = useState("");
+
+  // 포인트 잔액
+  const [balance, setBalance] = useState(null);
+  const [isLoadingBalance, setIsLoadingBalance] = useState(true);
+
+  // 출석 상태
+  const [attendanceStatus, setAttendanceStatus] = useState(null);
+
+  // 최근 포인트 내역
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [isLoadingActivity, setIsLoadingActivity] = useState(true);
 
   const fetchQuizDashboard = async () => {
     const userId = getStoredUserId();
@@ -97,8 +96,38 @@ export function MyScreen() {
     }
   };
 
+  const fetchPointData = async () => {
+    const userId = getStoredUserId();
+    if (!userId) return;
+
+    try {
+      setIsLoadingBalance(true);
+      const [balanceData, activityData, statusData] = await Promise.allSettled([
+        pointApi.getBalance(userId),
+        pointApi.getRecentActivity(userId),
+        pointApi.getAttendanceStatus(userId),
+      ]);
+
+      if (balanceData.status === "fulfilled") {
+        setBalance(balanceData.value);
+      }
+      if (activityData.status === "fulfilled") {
+        setRecentActivity(activityData.value ?? []);
+      }
+      if (statusData.status === "fulfilled") {
+        setAttendanceStatus(statusData.value);
+      }
+    } catch (error) {
+      console.error("포인트 데이터 조회 실패:", error);
+    } finally {
+      setIsLoadingBalance(false);
+      setIsLoadingActivity(false);
+    }
+  };
+
   useEffect(() => {
     fetchQuizDashboard();
+    fetchPointData();
   }, []);
 
   const rollingWeek = dashboard?.rollingWeek;
@@ -127,12 +156,16 @@ export function MyScreen() {
 
         <div className="mt-5 grid grid-cols-2 gap-3">
           <div className="rounded-2xl bg-white/16 p-4">
-            <div className="text-[24px] font-black">3,240</div>
-            <div className="text-[12px] font-bold text-white/75">FinIQ</div>
+            <div className="text-[24px] font-black">
+              {isLoadingBalance ? "…" : `${balance?.balance ?? 0}`}
+            </div>
+            <div className="text-[12px] font-bold text-white/75">포인트</div>
           </div>
 
           <div className="rounded-2xl bg-white/16 p-4">
-            <div className="text-[24px] font-black">42일</div>
+            <div className="text-[24px] font-black">
+              {attendanceStatus?.currentStreakDays ?? 0}일
+            </div>
             <div className="text-[12px] font-bold text-white/75">
               연속 출석
             </div>
@@ -338,35 +371,53 @@ export function MyScreen() {
           포인트 적립 및 사용 내역 (최근 3건)
         </p>
 
-        <div className="mt-3 space-y-3">
-          {pointHistory.map((item) => (
-            <div
-              key={`${item.title}-${item.desc}`}
-              className="flex items-center gap-3 rounded-2xl bg-[#faf8ff] p-3"
-            >
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[22px]">
-                {item.icon}
-              </div>
+        {isLoadingActivity && (
+          <div className="mt-4 rounded-xl bg-[#F7F3FF] p-4 text-center text-[13px] font-bold text-[#7C3AED]">
+            내역을 불러오는 중이에요
+          </div>
+        )}
 
-              <div className="flex-1">
-                <div className="text-[13px] font-black text-[#1a1a2e]">
-                  {item.title}
-                </div>
-                <div className="mt-1 text-[11px] font-bold text-[#8888aa]">
-                  {item.desc}
-                </div>
-              </div>
+        {!isLoadingActivity && recentActivity.length === 0 && (
+          <div className="mt-4 rounded-xl bg-[#F7F3FF] p-4 text-center text-[13px] font-bold text-[#8888aa]">
+            아직 포인트 내역이 없어요
+          </div>
+        )}
 
-              <div
-                className={`text-[14px] font-black ${
-                  item.isPlus ? "text-[#3CBBA2]" : "text-[#FF4D6D]"
-                }`}
-              >
-                {item.amount}
-              </div>
-            </div>
-          ))}
-        </div>
+        {!isLoadingActivity && recentActivity.length > 0 && (
+          <div className="mt-3 space-y-3">
+            {recentActivity.map((item, index) => {
+              const isPlus = item.delta > 0;
+              return (
+                <div
+                  key={item.relatedRef ?? index}
+                  className="flex items-center gap-3 rounded-2xl bg-[#faf8ff] p-3"
+                >
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[22px]">
+                    {getActivityIcon(item.type)}
+                  </div>
+
+                  <div className="flex-1">
+                    <div className="text-[13px] font-black text-[#1a1a2e]">
+                      {item.title}
+                    </div>
+                    <div className="mt-1 text-[11px] font-bold text-[#8888aa]">
+                      {formatDateTime(item.occurredAt)}
+                    </div>
+                  </div>
+
+                  <div
+                    className={`text-[14px] font-black ${
+                      isPlus ? "text-[#3CBBA2]" : "text-[#FF4D6D]"
+                    }`}
+                  >
+                    {isPlus ? "+" : ""}
+                    {item.delta}P
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </section>
     </div>
   );

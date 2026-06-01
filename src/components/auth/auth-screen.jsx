@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { authApi, saveAuth } from "@/lib/api";
+import { authApi, saveAuth, pointApi } from "@/lib/api";
 import { useApp } from "@/lib/app-context";
 
 const NICKNAME_KEY = "donbugi_nickname";
@@ -73,7 +73,22 @@ export function AuthScreen() {
         console.error("프로필 조회 실패:", profileError);
       }
 
-      toast("✅ 로그인되었습니다.");
+      // 로그인 성공 후 출석 체크 (실패해도 로그인 흐름에 영향 없음)
+      try {
+        const attendanceResult = await pointApi.checkAttendance({
+          userId: loginResult.userId,
+        });
+
+        if (!attendanceResult.alreadyCheckedInForDate) {
+          const points = attendanceResult.pointsAwardedThisRequest;
+          if (points > 0) {
+            toast(`🔥 출석 체크 완료! +${points}P 적립`);
+          }
+        }
+      } catch (attendanceError) {
+        console.error("출석 체크 실패:", attendanceError);
+      }
+
       setCurrentTab("home");
       goToScreen("main");
     } catch (error) {
