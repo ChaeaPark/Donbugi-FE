@@ -1,4 +1,3 @@
-//app-context.jsx
 "use client";
 
 import {
@@ -367,6 +366,9 @@ export function AppProvider({ children }) {
 
   const [addEventOpen, setAddEventOpen] = useState(false);
 
+  // ✅ 홈 뉴스 카드 → 뉴스 상세 직접 이동을 위한 pending 상태
+  const [pendingArticleId, setPendingArticleId] = useState(null);
+
   useEffect(() => {
     const token = sessionStorage.getItem(TOKEN_KEY);
     const savedNickname = loadNicknameFromBrowser();
@@ -485,6 +487,10 @@ export function AppProvider({ children }) {
 
     addEventOpen,
     setAddEventOpen,
+
+    // ✅ 추가
+    pendingArticleId,
+    setPendingArticleId,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
@@ -492,7 +498,6 @@ export function AppProvider({ children }) {
 
 export function useApp() {
   const context = useContext(AppContext);
-  const [economicWeather, setEconomicWeather] = useState(null);
   if (!context) {
     throw new Error("useApp must be used within an AppProvider");
   }
