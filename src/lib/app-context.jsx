@@ -330,7 +330,6 @@ function loadCurrentTabFromBrowser() {
 const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
-<<<<<<< HEAD
   const [isReady, setIsReady] = useState(false);
 
   const [currentScreen, setCurrentScreen] = useState("auth");
@@ -338,37 +337,6 @@ export function AppProvider({ children }) {
 
   const [userNick, setUserNickState] = useState("닉네임");
   const [userChar, setUserCharState] = useState(null);
-=======
-// App state
-const [currentScreen, setCurrentScreen] = useState("auth");
-const [currentTab, setCurrentTab] = useState("home");
-
-// User state
-const [userNick, setUserNick] = useState("닉네임");
-const [userChar, setUserChar] = useState(null);
-
-// 로그인 상태 복원
-useEffect(() => {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  const token =
-    localStorage.getItem("donbugi_access_token") ||
-    sessionStorage.getItem("donbugi_access_token");
-
-  const nickname = localStorage.getItem("donbugi_nickname");
-
-  if (nickname) {
-    setUserNick(nickname);
-  }
-
-  if (token) {
-    setCurrentScreen("main");
-    setCurrentTab("home");
-  }
-}, []);
->>>>>>> 478a200 (FIX: 새로고침 시 로그인 풀리는 문제 해결)
 
   const [obStep, setObStep] = useState(0);
   const [obScores, setObScores] = useState([0, 0, 0, 0]);
