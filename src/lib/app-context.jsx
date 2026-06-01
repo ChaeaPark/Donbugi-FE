@@ -9,6 +9,7 @@ import {
 } from "react";
 
 const TOKEN_KEY = "donbugi_access_token";
+const USER_ID_KEY = "donbugi_user_id";
 const NICKNAME_KEY = "donbugi_nickname";
 const USER_CHAR_KEY = "donbugi_user_char";
 const CURRENT_TAB_KEY = "donbugi_current_tab";
@@ -328,7 +329,7 @@ function loadCurrentTabFromBrowser() {
     return "home";
   }
 
-  return localStorage.getItem(CURRENT_TAB_KEY) || "home";
+  return sessionStorage.getItem(CURRENT_TAB_KEY) || "home";
 }
 
 const AppContext = createContext(null);
@@ -365,7 +366,7 @@ export function AppProvider({ children }) {
   const [addEventOpen, setAddEventOpen] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem(TOKEN_KEY);
+    const token = sessionStorage.getItem(TOKEN_KEY);
     const savedNickname = loadNicknameFromBrowser();
     const savedCharacter = loadCharacterFromBrowser();
     const savedTab = loadCurrentTabFromBrowser();
@@ -379,6 +380,9 @@ export function AppProvider({ children }) {
     } else {
       setCurrentScreen("auth");
       setCurrentTabState("home");
+      sessionStorage.removeItem(CURRENT_TAB_KEY);
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(USER_ID_KEY);
       localStorage.removeItem(CURRENT_TAB_KEY);
     }
 
@@ -389,7 +393,7 @@ export function AppProvider({ children }) {
     setCurrentTabState(tab);
 
     if (typeof window !== "undefined") {
-      localStorage.setItem(CURRENT_TAB_KEY, tab);
+      sessionStorage.setItem(CURRENT_TAB_KEY, tab);
     }
   }, []);
 
