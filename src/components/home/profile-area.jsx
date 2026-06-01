@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useApp, KOSPI_STATUS, CHARS } from "@/lib/app-context";
-import { authApi } from "@/lib/api";
+import { authApi, mainApi } from "@/lib/api";
 
 const NICKNAME_KEY = "donbugi_nickname";
 const USER_CHAR_KEY = "donbugi_user_char";
@@ -21,6 +21,7 @@ export function ProfileArea() {
 
   const [displayNick, setDisplayNick] = useState(userNick || "닉네임");
   const [displayChar, setDisplayChar] = useState(userChar || CHARS[0]);
+  const [economicWeather, setEconomicWeather] = useState(null);
 
   const kospi = KOSPI_STATUS[currentKospiStatus];
 
@@ -104,6 +105,24 @@ export function ProfileArea() {
     }
   }, [userChar]);
 
+
+  useEffect(() => {
+  const loadEconomicWeather = async () => {
+    try {
+      const data = await mainApi.getEconomicWeather();
+      setEconomicWeather(data);
+
+      console.log("경제 날씨 API:", data);
+
+    } catch (error) {
+      console.error("경제 날씨 조회 실패:", error);
+    }
+  };
+
+  loadEconomicWeather();
+}, []);
+
+
   return (
     <section className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#7C3AED] to-[#A855F7] px-5 py-5 text-white shadow-[0_16px_35px_rgba(124,58,237,0.25)]">
       <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/10" />
@@ -134,11 +153,17 @@ export function ProfileArea() {
             onClick={() => setMarketTempOpen(true)}
             className="rounded-2xl bg-white/18 px-3 py-2 text-left shadow-sm backdrop-blur"
           >
-            <div className="text-[18px] leading-none">{kospi.icon}</div>
+            <div className="text-[18px] leading-none">
+                {economicWeather?.emoji || kospi.icon}
+            </div>
+
             <div className="mt-1 text-[10px] font-semibold text-white/75">
               시장 날씨
             </div>
-            <div className="text-[12px] font-extrabold">{kospi.label}</div>
+
+            <div className="text-[12px] font-extrabold">
+              {economicWeather?.weatherLabel || kospi.label}
+            </div>
           </button>
 
           <button
