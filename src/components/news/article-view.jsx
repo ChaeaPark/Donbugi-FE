@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useApp, ARTS } from "@/lib/app-context";
 import { HashTag } from "@/components/shared/pill";
-import { getStoredUserId, pointApi, quizApi } from "@/lib/api";
+import {  getStoredUserId, pointApi, quizApi, articleApi } from "@/lib/api";
 
 function normalizeArticleQuiz(item, index) {
   const options = Array.isArray(item.options) ? item.options : [];
@@ -42,7 +42,7 @@ function normalizeStaticQuiz(article) {
 export function ArticleView({ articleId, onBack, onHashtagClick }) {
   const { artQuizDone, setArtQuizDone, toast } = useApp();
 
-  const article = ARTS[articleId];
+  const [article, setArticle] = useState(null);
   const numericArticleId = Number(articleId);
   const canUseApi = Number.isFinite(numericArticleId);
 
@@ -53,6 +53,22 @@ export function ArticleView({ articleId, onBack, onHashtagClick }) {
   const quizStateKey = useMemo(() => {
     return `article-${articleId}`;
   }, [articleId]);
+
+  useEffect(() => {
+      const fetchArticle = async () => {
+        try {
+          const data = await articleApi.getArticleDetail(articleId);
+
+          console.log("기사 상세", data);
+
+          setArticle(data);
+        } catch (error) {
+          console.error("기사 상세 조회 실패:", error);
+        }
+      };
+
+      fetchArticle();
+    }, [articleId]);
 
   useEffect(() => {
     const fetchArticleQuiz = async () => {
@@ -191,7 +207,7 @@ export function ArticleView({ articleId, onBack, onHashtagClick }) {
           className="inline-flex items-center rounded-full px-3 py-1 text-[12px] font-black mb-3"
           style={{ color: article.cc, backgroundColor: article.cb }}
         >
-          {article.cat}
+          {article.category}
         </div>
 
         <h1 className="text-[22px] font-black leading-snug text-[#1a1a2e] mb-3">
@@ -199,16 +215,16 @@ export function ArticleView({ articleId, onBack, onHashtagClick }) {
         </h1>
 
         <div className="text-[13px] font-bold text-[#8888aa] mb-4">
-          {article.src} · {article.dt}
+          {article.source} · {article.publishedAt}
         </div>
 
         <div
           className="article-body text-[15px] leading-7 text-[#333]"
-          dangerouslySetInnerHTML={{ __html: article.body }}
+          dangerouslySetInnerHTML={{ __html: article.content }}
         />
 
         <div className="flex flex-wrap gap-2 mt-5">
-          {article.tags.map((tag) => (
+          {article.tags?.map((tag) => (
             <button
               key={tag}
               type="button"
@@ -228,7 +244,7 @@ export function ArticleView({ articleId, onBack, onHashtagClick }) {
           rel="noreferrer"
           className="mt-5 block rounded-xl bg-[#F7F3FF] px-4 py-3 text-center text-[14px] font-black text-[#7C3AED]"
         >
-          원문 보기 — {article.src} ↗
+          원문 보기 — {article.source} ↗
         </a>
       </article>
 

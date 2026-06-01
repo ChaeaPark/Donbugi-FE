@@ -17,7 +17,7 @@ useEffect(() => {
 
 const loadLatestNews = async () => {
   try {
-    const data = await articleApi.getLatest(10);
+    const data = await articleApi.getLatestArticles(10);
 
     console.log("최신 뉴스", data);
 
