@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useApp } from "@/lib/app-context";
+import { getStoredUserId, pointApi } from "@/lib/api";
 import { NavBar } from "@/components/shared/nav-bar";
 import { Toast } from "@/components/shared/toast";
 import { NotificationPanel } from "@/components/shared/notification-panel";
@@ -19,7 +21,56 @@ import { ShopScreen } from "@/components/shop/shop-screen";
 import { MyScreen } from "@/components/my/my-screen";
 
 export function MainApp() {
-  const { isReady, currentScreen, currentTab } = useApp();
+  const { isReady, currentScreen, currentTab, toast } = useApp();
+  const attendanceRequestedRef = useRef(false);
+
+  useEffect(() => {
+    const requestAttendance = async () => {
+      if (!isReady || currentScreen !== "main") {
+        return;
+      }
+
+      if (attendanceRequestedRef.current) {
+        return;
+      }
+
+      const userId = getStoredUserId();
+
+      if (!userId) {
+        console.log("출석 체크 불가: userId 없음");
+        return;
+      }
+
+      try {
+        attendanceRequestedRef.current = true;
+
+        console.log("출석 체크 요청 시작:", userId);
+
+        const attendanceResult = await pointApi.checkAttendance({
+          userId,
+        });
+
+        console.log("출석 체크 응답:", attendanceResult);
+
+        const points =
+          attendanceResult?.pointsAwardedThisRequest ??
+          attendanceResult?.pointsAwarded ??
+          attendanceResult?.awardedPoints ??
+          attendanceResult?.rewardPoints ??
+          attendanceResult?.delta ??
+          0;
+
+        if (points > 0) {
+          toast?.(`🔥 출석 체크 완료! +${points}P 적립`);
+        }
+      } catch (error) {
+        attendanceRequestedRef.current = false;
+        console.error("출석 체크 실패:", error);
+      }
+    };
+
+    requestAttendance();
+  }, [isReady, currentScreen, toast]);
 
   const renderMainTab = () => {
     switch (currentTab) {
