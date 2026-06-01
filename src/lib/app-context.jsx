@@ -8,6 +8,11 @@ import {
   useEffect,
 } from "react";
 
+const TOKEN_KEY = "donbugi_access_token";
+const USER_ID_KEY = "donbugi_user_id";
+const NICKNAME_KEY = "donbugi_nickname";
+const USER_CHAR_KEY = "donbugi_user_char";
+const CURRENT_TAB_KEY = "donbugi_current_tab";
 
 // Character data
 export const CHARS = [
