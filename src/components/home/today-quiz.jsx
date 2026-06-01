@@ -108,10 +108,10 @@ export function TodayQuiz() {
       setRewardRequested(true);
 
       const results = quizzes.map((quiz, index) => ({
-      order: Number(quiz.order || index + 1),
-      attempted: !!nextQDone[quiz.id],
-      correct: !!nextQDone[quiz.id]?.correct,
-    }));
+        order: Number(quiz.order || index + 1),
+        attempted: !!nextQDone[quiz.id],
+        correct: !!nextQDone[quiz.id]?.correct,
+      }));
 
       const rewardResult = await pointApi.rewardDailyQuiz({
         userId,
@@ -232,7 +232,7 @@ export function TodayQuiz() {
                 </div>
 
                 <div className="text-left text-[15px] font-black text-[#1a1a2e] mb-3 leading-relaxed">
-                  Q{quiz.order}. {quiz.question}
+                  Q{quiz.order}. {quiz.question.replace(/^(본문|기사)에 따르면,\s*/, "")}
                 </div>
 
                 <div className="grid gap-2">
