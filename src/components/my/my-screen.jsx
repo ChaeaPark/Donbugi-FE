@@ -168,7 +168,7 @@ export function MyScreen() {
         <div className="mt-5 grid grid-cols-2 gap-3">
           <div className="rounded-2xl bg-white/16 p-4">
             <div className="text-[24px] font-black">{isLoadingPoints ? "..." : pointBalance.toLocaleString()}</div>
-            <div className="text-[12px] font-bold text-white/75">FinIQ</div>
+            <div className="text-[12px] font-bold text-white/75">포인트</div>
           </div>
           <div className="rounded-2xl bg-white/16 p-4">
             <div className="text-[24px] font-black">{isLoadingPoints ? "..." : `${attendanceStatus?.currentStreakDays ?? 0}일`}</div>
